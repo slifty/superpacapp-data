@@ -1,0 +1,50 @@
+body {
+	background: url('../img/design.jpg');
+	height: 1750px;
+}
+
+#data-explorer {
+	width: 994px;
+	height: 818px;
+	margin-left: 295px;
+	margin-top: 536px;
+	background: #DFE0E5;
+	border: 1px solid #cfcfcf;
+	padding: 10px; 
+}
+#data-explorer .scroll {
+	overflow: auto;
+	overflow-y:hidden;
+}
+#data-explorer-content {
+	height: 520px;
+}
+#data-explorer-xaxis {
+	height: 140px;
+}
+#data-explorer-yaxis {
+	height: 520px;
+	width: 70px;
+	float: left;
+}
+#data-explorer-graph { margin-top :20px; padding: 10px; }
+#data-explorer-menu { height: 100px; }
+#data-explorer-menu h3 { margin: 0px; color: #47494b; }
+#data-explorer-menu .section { width: 50%; float: left; }
+#data-explorer-menu ul { margin: 0px; padding :0px; }
+#data-explorer-menu li { float: left; list-style: none; width: 120px; cursor: pointer; text-align: center; background: #313234; border: 1px solid #2C3135; color: #FFF; padding: 5px;  margin: 5px;}
+
+svg rect {
+	fill: #313234;
+} 
+svg .axis path, svg .axis line {
+    fill: none;
+    stroke: #47494b;
+    shape-rendering: crispEdges;
+}
+svg .axis path, svg .axis text {
+    fill: none;
+    stroke: #47494b;
+    shape-rendering: crispEdges;
+    font-size: 9pt;
+}

@@ -3,132 +3,38 @@
 <html>
 	<head>
 		<title></title>
-		<link rel="stylesheet" href="css/data_explorer.css">
+		<link rel="stylesheet" href="css/global.css">
+		<link rel="stylesheet" href="css/data-explorer.css">
 		<script src="js/jquery-1.9.0.min.js"></script>
 		<script src="js/d3.min.js"></script>
-		<script>
-			$(function() {
-				var base = $("#data_exploration");
-				var datasets = {};
-				$.when(
-					$.ajax({
-						dataType: "json",
-						method: "GET",
-						url: "data/ad_claims.json"
-					}).success(function(data) { datasets["ad_claims"] = data; }),
-					$.ajax({
-						dataType: "json",
-						method: "GET",
-						url: "data/sessions_activity.json"
-					}).success(function(data) { datasets["sessions_activity"] = data; }),
-					$.ajax({
-						dataType: "json",
-						method: "GET",
-						url: "data/sessions_city.json"
-					}).success(function(data) { datasets["sessions_city"] = data; }),
-					$.ajax({
-						dataType: "json",
-						method: "GET",
-						url: "data/sessions_country.json"
-					}).success(function(data) { datasets["sessions_country"] = data; }),
-					$.ajax({
-						dataType: "json",
-						method: "GET",
-						url: "data/sessions_date.json"
-					}).success(function(data) { datasets["sessions_date"] = data; }),
-					$.ajax({
-						dataType: "json",
-						method: "GET",
-						url: "data/sessions_state.json"
-					}).success(function(data) { datasets["sessions_state"] = data; }),
-					$.ajax({
-						dataType: "json",
-						method: "GET",
-						url: "data/sessions_time.json"
-					}).success(function(data) { datasets["sessions_time"] = data; })
-				)
-				.then(function() {
-					console.log("loaded!");
-					var data = []
-					for(var x in datasets["sessions_time"]) {
-						var item = datasets["sessions_time"][x];
-						data.push(parseInt(item.sessions));
-					}
-					console.log(data);
-					var w = 400
-					var h = 200
-					var margin = 20
-					var y = d3.scale.linear().domain([0, d3.max(data)]).range([0 + margin, h - margin])
-					var x = d3.scale.linear().domain([0, data.length]).range([0 + margin, w - margin])
-
-					var vis = d3.select("#data_exploration")
-						.append("svg:svg")
-						.attr("width", w)
-						.attr("height", h)
-
-					var g = vis.append("svg:g")
-						.attr("transform", "translate(0, 200)");
-
-					var line = d3.svg.line()
-						.x(function(d,i) { return x(i); })
-						.y(function(d) { return -1 * y(d); })
-
-					g.append("svg:path").attr("d", line(data));
-
-					g.append("svg:line")
-						.attr("x1", x(0))
-						.attr("y1", -1 * y(0))
-						.attr("x2", x(w))
-						.attr("y2", -1 * y(0))
-
-					g.append("svg:line")
-						.attr("x1", x(0))
-						.attr("y1", -1 * y(0))
-						.attr("x2", x(0))
-						.attr("y2", -1 * y(d3.max(data)))
-
-					g.selectAll(".xLabel")
-						.data(x.ticks(5))
-						.enter().append("svg:text")
-						.attr("class", "xLabel")
-						.text(String)
-						.attr("x", function(d) { return x(d) })
-						.attr("y", 0)
-						.attr("text-anchor", "middle")
-
-					g.selectAll(".yLabel")
-						.data(y.ticks(4))
-						.enter().append("svg:text")
-						.attr("class", "yLabel")
-						.text(String)
-						.attr("x", 0)
-						.attr("y", function(d) { return -1 * y(d) })
-						.attr("text-anchor", "right")
-						.attr("dy", 4)
-
-					g.selectAll(".xTicks")
-						.data(x.ticks(5))
-						.enter().append("svg:line")
-						.attr("class", "xTicks")
-						.attr("x1", function(d) { return x(d); })
-						.attr("y1", -1 * y(0))
-						.attr("x2", function(d) { return x(d); })
-						.attr("y2", -1 * y(-0.3))
-
-					g.selectAll(".yTicks")
-						.data(y.ticks(4))
-						.enter().append("svg:line")
-						.attr("class", "yTicks")
-						.attr("y1", function(d) { return -1 * y(d); })
-						.attr("x1", x(-0.3))
-						.attr("y2", function(d) { return -1 * y(d); })
-						.attr("x2", x(0))
-
-				})
-			});
-		</script>
+		<script src="js/data-explorer.js"></script>
 	</head>
 	<body>
-		<div id="data_exploration"></div>
+		<div id="data-explorer">
+			<div id="data-explorer-menu">
+				<div class="section">
+					<h3>Total Actions</h3>
+					<ul>
+						<li id="data-option-activity">by Activity</li>
+						<li id="data-option-city">by City</li>
+						<li id="data-option-country">by Country</li>
+						<li id="data-option-date">by Date</li>
+						<li id="data-option-state">by State</li>
+						<li id="data-option-time">by Time</li>
+					</ul>
+				</div>
+				<div class="section">
+					<h3>Timelines</h3>
+				</div>
+			</div>
+			<hr />
+			<div id="data-explorer-graph">
+				<div id="data-explorer-yaxis"></div>
+				<div class="scroll">
+					<div id="data-explorer-content"></div>
+					<div id="data-explorer-xaxis"></div>
+				</div>
+			</div>
+		</div>
 	</body>
 </html>
