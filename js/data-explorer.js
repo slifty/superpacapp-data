@@ -194,7 +194,7 @@ $(function() {
 			.attr("y", function(d) { return h - padding; })
 			.transition()
 			.duration(300)
-			.delay(function(d,i) { return i * 50; })
+			.delay(function(d,i) { return i * 20; })
 			.attr("height", function(d) { return h - padding - yScale(d.value); })
 			.attr("y", function(d) { return yScale(d.value); })
 
@@ -260,7 +260,7 @@ $(function() {
 			.attr("y", function(d) { return h - padding; })
 			.transition()
 			.duration(300)
-			.delay(function(d,i) { return i * 50; })
+			.delay(function(d,i) { return i * 20; })
 			.attr("height", function(d) { return h - padding - yScale(d.value); })
 			.attr("y", function(d) { return yScale(d.value); })
 
