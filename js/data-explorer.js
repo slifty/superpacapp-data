@@ -176,6 +176,7 @@ $(function() {
 		var svg_xaxis = d3.select("#data-explorer-xaxis")
 			.append("svg")
 			.attr("width", w + 40)
+			.attr("height", 40)
 
 		svg_yaxis.append("g")
 			.call(yAxis)
@@ -189,7 +190,7 @@ $(function() {
 		bars.enter()
 			.append("rect")
 			.attr("x", function(d, i) { return xScale(i); })
-			.attr("width", function(d) { return w / dataset.length - 2; })
+			.attr("width", function(d) { return w / dataset.length - 4; })
 			.attr("y", function(d) { return h - padding; })
 			.transition()
 			.duration(300)
@@ -241,6 +242,7 @@ $(function() {
 		var svg_xaxis = d3.select("#data-explorer-xaxis")
 			.append("svg")
 			.attr("width", w + 40)
+			.attr("height", Math.max(50,d3.max(dataset, function(d) { return d.label.length; }) * 5))
 
 		svg_yaxis.append("g")
 			.call(yAxis)
@@ -254,7 +256,7 @@ $(function() {
 		bars.enter()
 			.append("rect")
 			.attr("x", function(d, i) { return xScale(i); })
-			.attr("width", function(d) { return w / dataset.length - 2; })
+			.attr("width", function(d) { return w / dataset.length - 4; })
 			.attr("y", function(d) { return h - padding; })
 			.transition()
 			.duration(300)

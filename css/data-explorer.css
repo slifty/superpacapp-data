@@ -9,9 +9,9 @@ body {
 	margin-left: 295px;
 	margin-top: 536px;
 	background: #DFE0E5;
-	border: 1px solid #cfcfcf;
 	padding: 10px; 
 }
+#data-explorer .loader{ margin: 50px auto; display: block; width: 300px;}
 #data-explorer .scroll {
 	overflow: auto;
 	overflow-y:hidden;
@@ -19,15 +19,13 @@ body {
 #data-explorer-content {
 	height: 520px;
 }
-#data-explorer-xaxis {
-	height: 140px;
-}
+#data-explorer-xaxis { }
 #data-explorer-yaxis {
 	height: 520px;
 	width: 70px;
 	float: left;
 }
-#data-explorer-graph { margin-top :20px; padding: 10px; }
+#data-explorer-graph { margin-top :20px; padding: 10px; background: #F1F1F1;  border: 1px solid #bfbfbf;-webkit-border-radius: 4px; -moz-border-radius: 4px; border-radius: 4px; }
 #data-explorer-menu { height: 100px; }
 #data-explorer-menu h3 { margin: 0px; color: #47494b; }
 #data-explorer-menu .section { width: 50%; float: left; }
@@ -36,7 +34,8 @@ body {
 #data-explorer-menu li.active { background: #274A6A; }
 
 svg rect {
-	fill: #313234;
+	fill: #274A6A;
+	stroke: #47494b;
 } 
 svg .axis path, svg .axis line {
     fill: none;
