@@ -120,7 +120,8 @@ $(function() {
 			$button.addClass("active");
 	}
 	function render_timeline(tag) {
-		var core_dataset = datasets["voting_data"];
+		data = datasets["voting_data"];
+		var core_dataset = data.items;
 		var filtered_dataset = [];
 		var calculated_dataset = {};
 		var dataset = [];
@@ -150,7 +151,7 @@ $(function() {
 			.append('<div id="data-filters" />')
 		var $content = $("#data-explorer-content");
 
-		var w = dataset.length * 50;
+		var w = $content.width();
 		var h = $content.height();
 		var padding = 5;
 
@@ -175,17 +176,25 @@ $(function() {
 			.attr("height", h)
 		var svg_xaxis = d3.select("#data-explorer-xaxis")
 			.append("svg")
-			.attr("width", w + 40)
+			.attr("width", w)
 			.attr("height", 40)
 
 		svg_yaxis.append("g")
 			.call(yAxis)
-    		.attr("transform", "translate(60,0)")
+    		.attr("transform", "translate(100,0)")
 			.attr("class","axis");
 		var bars = svg_content.selectAll("rect")
 			.data(dataset);
 		var labels = svg_xaxis.selectAll("text")
 			.data(dataset);
+
+		var ylabel = svg_yaxis.append("text")
+			.attr("class", "label")
+			.text(data.units)
+		ylabel
+			.attr("y", h/2 + ylabel.node().getComputedTextLength() / 2)
+			.attr("x", 35)
+			.attr("transform","rotate(270,35," + (h/2 + ylabel.node().getComputedTextLength() / 2) + ")")
 
 		bars.enter()
 			.append("rect")
@@ -197,26 +206,18 @@ $(function() {
 			.delay(function(d,i) { return i * 20; })
 			.attr("height", function(d) { return h - padding - yScale(d.value); })
 			.attr("y", function(d) { return yScale(d.value); })
-
-		labels.enter()
-			.append("text")
-			.attr("x", function(d, i) {
-            	return xScale(i) + 15;
-			})
-			.attr("y", 10)
-			.text(function(d) { return d.label })
-    		.attr("transform", function(d, i) { return "rotate(40," + (xScale(i) + 15) + ",10)"; })
+		
 	}
 
-	function render_graph(dataset) {
-		var current_dataset = dataset;
+	function render_graph(data) {
+		var dataset = data.items;
 		var $graph = $("#data-explorer-graph")
 			.empty()
 			.append('<div id="data-explorer-yaxis" />')
 			.append('<div class="scroll"><div id="data-explorer-content" /><div id="data-explorer-xaxis" /></div>');
 		var $content = $("#data-explorer-content");
 
-		var w = dataset.length * 50;
+		var w = $content.width();
 		var h = $content.height();
 		var padding = 5;
 
@@ -241,20 +242,32 @@ $(function() {
 			.attr("height", h)
 		var svg_xaxis = d3.select("#data-explorer-xaxis")
 			.append("svg")
-			.attr("width", w + 40)
-			.attr("height", Math.max(50,d3.max(dataset, function(d) { return d.label.length; }) * 5))
+			.attr("width", w)
+			.attr("height", 70)
 
 		svg_yaxis.append("g")
 			.call(yAxis)
-    		.attr("transform", "translate(60,0)")
+    		.attr("transform", "translate(100,0)")
 			.attr("class","axis");
-		var bars = svg_content.selectAll("rect")
+
+		var ylabel = svg_yaxis.append("text")
+			.attr("class", "label")
+			.text(data.units)
+		ylabel
+			.attr("y", h/2 + ylabel.node().getComputedTextLength() / 2)
+			.attr("x", 35)
+			.attr("transform","rotate(270,35," + (h/2 + ylabel.node().getComputedTextLength() / 2) + ")")
+
+		var columns = svg_content.selectAll("rect.column")
+			.data(dataset);
+		var bars = svg_content.selectAll("rect.bar")
 			.data(dataset);
 		var labels = svg_xaxis.selectAll("text")
 			.data(dataset);
 
 		bars.enter()
 			.append("rect")
+			.attr("class","bar")
 			.attr("x", function(d, i) { return xScale(i); })
 			.attr("width", function(d) { return w / dataset.length - 4; })
 			.attr("y", function(d) { return h - padding; })
@@ -264,13 +277,31 @@ $(function() {
 			.attr("height", function(d) { return h - padding - yScale(d.value); })
 			.attr("y", function(d) { return yScale(d.value); })
 
-		labels.enter()
-			.append("text")
-			.attr("x", function(d, i) {
-            	return xScale(i) + 15;
-			})
-			.attr("y", 10)
-			.text(function(d) { return d.label })
-    		.attr("transform", function(d, i) { return "rotate(40," + (xScale(i) + 15) + ",10)"; })
+		columns.enter()
+			.append("rect")
+			.attr("class","column")
+			.attr("x", function(d, i) { return xScale(i); })
+			.attr("width", function(d) { return w / dataset.length - 4; })
+			.attr("height", function(d) { return h; })
+			.on("mouseover", function(d, i) {
+				var container = svg_xaxis.append("g");
+				var label = container.append("text")
+					.attr("class","label")
+					.attr("y",40)
+					.text(d.label)
+				var value = container.append("text")
+					.attr("class","value")
+					.attr("y",60)
+					.text(d.value)
+
+				label.attr("x", w/2 - label.node().getComputedTextLength() / 2)
+				value.attr("x", w/2 - value.node().getComputedTextLength() / 2)
+			} )
+			.on("mouseout", function(d, i) {
+				var container = svg_xaxis.node()
+				while (container.lastChild) {
+					container.removeChild(container.lastChild);
+				}
+			} )
 	}
 });
