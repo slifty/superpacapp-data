@@ -299,10 +299,22 @@ $(function() {
 			.append("svg")
 			.attr("width", 100)
 			.attr("height", h)
+		var svg_xaxis = d3.select("#data-explorer-xaxis")
+			.append("svg")
+			.attr("width", w)
+			.attr("height", 20)
 		var svg_hover = d3.select("#data-explorer-xaxis")
 			.append("svg")
 			.attr("width", w)
 			.attr("height", 70)
+
+		var xlabel = svg_xaxis.append("text")
+			.attr("class", "xlabel")
+			.text(data.xlabel)
+		xlabel
+			.attr("y", 20)
+			.attr("x", w/2 - xlabel.node().getComputedTextLength() / 2)
+
 
 		svg_yaxis.append("g")
 			.call(yAxis)
@@ -311,7 +323,7 @@ $(function() {
 
 		var ylabel = svg_yaxis.append("text")
 			.attr("class", "ylabel")
-			.text(data.units)
+			.text(data.ylabel)
 		ylabel
 			.attr("y", h/2 + ylabel.node().getComputedTextLength() / 2)
 			.attr("x", 35)
