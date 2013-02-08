@@ -38,6 +38,9 @@ svg rect.bar {
 	fill: #274A6A;
 	stroke: #47494b;
 } 
+svg rect.bar.active {
+	fill: #ff0000;
+} 
 svg rect.column {
 	fill: rgba(0,0,0,0);
 } 
@@ -52,7 +55,14 @@ svg .axis path, svg .axis text {
     shape-rendering: crispEdges;
     font-size: 9pt;
 }
-svg text.label {
+svg text.xlabel {
+	font-weight: bold;
+}
+svg text.ylabel {
+    font-size: 20pt;
+	font-weight: bold;
+}
+svg text.hoverlabel {
 	font-weight: bold;
     font-size: 20pt;
 }

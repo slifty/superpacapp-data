@@ -86,28 +86,16 @@ $(function() {
 				render_graph(datasets["sessions_time"]);
 			});
 
-		var $filter_love = $("#data-filter-love")
+		var $filter_candidate = $("#data-filter-suppopps")
 			.click(function() {
 				set_active_button($(this));
-				render_timeline("love");
+				render_timeline("suppopps");
 			});
 
-		var $filter_fail = $("#data-filter-fail")
+		var $filter_org = $("#data-filter-org_types")
 			.click(function() {
 				set_active_button($(this));
-				render_timeline("fail");
-			});
-
-		var $filter_fishy = $("#data-filter-fishy")
-			.click(function() {
-				set_active_button($(this));
-				render_timeline("fishy");
-			});
-
-		var $filter_false = $("#data-filter-fair")
-			.click(function() {
-				set_active_button($(this));
-				render_timeline("fair");
+				render_timeline("org_types");
 			});
 
 
@@ -119,30 +107,56 @@ $(function() {
 			$(".active").removeClass("active");
 			$button.addClass("active");
 	}
-	function render_timeline(tag) {
+	function render_timeline(type) {
 		data = datasets["voting_data"];
 		var core_dataset = data.items;
-		var filtered_dataset = [];
+		var attributes = {
+			tags: [],
+			org_types: [],
+			suppopps: []
+		};
 		var calculated_dataset = {};
 		var dataset = [];
+		var period = 1;
+
 		for(var x in core_dataset) {
-			if(core_dataset[x]["tag"] != tag)
-				continue;
-			filtered_dataset.push(core_dataset[x]);
+			var item = core_dataset[x];
+			if(attributes["tags"].indexOf(item["tag"]) == -1)
+				attributes["tags"].push(item["tag"]);
+			if(attributes["suppopps"].indexOf(item["suppopp"]) == -1)
+				attributes["suppopps"].push(item["suppopp"]);
+			if(attributes["org_types"].indexOf(item["org_type"]) == -1)
+				attributes["org_types"].push(item["org_type"]);
+		}
+
+		for(var x in attributes["tags"]) {
+			calculated_dataset[attributes["tags"][x]] = {
+				"suppopps": {},
+				"org_types": {}
+			}
+			for(var y in attributes["suppopps"])
+				calculated_dataset[attributes["tags"][x]]["suppopps"][attributes["suppopps"][y]] = 0;
+			for(var y in attributes["org_types"])
+				calculated_dataset[attributes["tags"][x]]["org_types"][attributes["org_types"][y]] = 0;
+		}
+
+		for(var x in core_dataset) {
+			calculated_dataset[core_dataset[x]["tag"]]["suppopps"][core_dataset[x]["suppopp"]]++;
+			calculated_dataset[core_dataset[x]["tag"]]["org_types"][core_dataset[x]["org_type"]]++;
 		}
 		
-		for(var x in filtered_dataset) {
-			if(!(filtered_dataset[x].date_only in calculated_dataset)) {
-				calculated_dataset[filtered_dataset[x].date_only] = {
-					label: filtered_dataset[x].date_only,
-					value: 0
+		for(var x in calculated_dataset) {
+			var tag = calculated_dataset[x];
+			period = 0
+			for(var y in tag[type]) {
+				period++;
+				var item = {
+					"value": tag[type][y],
+					"label": y
 				}
+				dataset.push(item);
 			}
-			calculated_dataset[filtered_dataset[x].date_only].value++;
 		}
-		for(var x in calculated_dataset)
-			dataset.push(calculated_dataset[x]);
-		dataset = dataset.reverse();
 
 		var $graph = $("#data-explorer-graph")
 			.empty()
@@ -156,10 +170,10 @@ $(function() {
 		var padding = 5;
 
 		var xScale = d3.scale.linear()
-			.domain([0, dataset.length])
+			.domain([0, dataset.length + attributes["tags"].length])
 			.range([0, w]);
 		var yScale = d3.scale.linear()
-			.domain([0, 2500])
+			.domain([0, d3.max(dataset, function(d) { return parseInt(d.value); })])
 			.range([h - padding, 10]);
 		var yAxis = d3.svg.axis()
 			.scale(yScale)
@@ -177,36 +191,81 @@ $(function() {
 		var svg_xaxis = d3.select("#data-explorer-xaxis")
 			.append("svg")
 			.attr("width", w)
-			.attr("height", 40)
+			.attr("height", 30)
+		var svg_hover = d3.select("#data-explorer-xaxis")
+			.append("svg")
+			.attr("width", w)
+			.attr("height", 70)
 
 		svg_yaxis.append("g")
 			.call(yAxis)
     		.attr("transform", "translate(100,0)")
 			.attr("class","axis");
+
+		var columns = svg_content.selectAll("rect.column")
+			.data(dataset);
 		var bars = svg_content.selectAll("rect")
 			.data(dataset);
 		var labels = svg_xaxis.selectAll("text")
 			.data(dataset);
+		var xlabels = svg_xaxis.selectAll("text")
+			.data(attributes["tags"]);
 
 		var ylabel = svg_yaxis.append("text")
-			.attr("class", "label")
+			.attr("class", "ylabel")
 			.text(data.units)
 		ylabel
 			.attr("y", h/2 + ylabel.node().getComputedTextLength() / 2)
 			.attr("x", 35)
 			.attr("transform","rotate(270,35," + (h/2 + ylabel.node().getComputedTextLength() / 2) + ")")
 
+		xlabels.enter()
+			.append("text")
+			.attr("class","xlabel")
+			.text(function(d) { return d; })
+			.attr("y", 20)
+			.attr("x", function(d,i) { return Math.floor(i / attributes["tags"].length * w + (w / (dataset.length + attributes["tags"].length) * period) / 2); })
+			.attr("text-anchor", "middle")
+
 		bars.enter()
 			.append("rect")
-			.attr("x", function(d, i) { return xScale(i); })
-			.attr("width", function(d) { return w / dataset.length - 4; })
+			.attr("class","bar")
+			.attr("x", function(d, i) { return xScale(i + Math.floor(i/period)); })
+			.attr("width", function(d) { return w / (dataset.length + attributes["tags"].length) - 4; })
 			.attr("y", function(d) { return h - padding; })
 			.transition()
 			.duration(300)
 			.delay(function(d,i) { return i * 20; })
 			.attr("height", function(d) { return h - padding - yScale(d.value); })
 			.attr("y", function(d) { return yScale(d.value); })
-		
+
+		columns.enter()
+			.append("rect")
+			.attr("class","column")
+			.attr("x", function(d, i) { return xScale(i + Math.floor(i/period)); })
+			.attr("width", function(d) { return w / dataset.length - 4; })
+			.attr("height", function(d) { return h; })
+			.on("mouseover", function(d, i) {
+				var container = svg_hover.append("g");
+				var label = container.append("text")
+					.attr("class","hoverlabel")
+					.attr("y",40)
+					.text(d.label)
+				var value = container.append("text")
+					.attr("class","value")
+					.attr("y",60)
+					.text(d.value)
+
+				label.attr("x", w/2 - label.node().getComputedTextLength() / 2)
+				value.attr("x", w/2 - value.node().getComputedTextLength() / 2)
+			} )
+			.on("mouseout", function(d, i) {
+				var container = svg_hover.node()
+				while (container.lastChild) {
+					container.removeChild(container.lastChild);
+				}
+			} )
+
 	}
 
 	function render_graph(data) {
@@ -240,7 +299,7 @@ $(function() {
 			.append("svg")
 			.attr("width", 100)
 			.attr("height", h)
-		var svg_xaxis = d3.select("#data-explorer-xaxis")
+		var svg_hover = d3.select("#data-explorer-xaxis")
 			.append("svg")
 			.attr("width", w)
 			.attr("height", 70)
@@ -251,7 +310,7 @@ $(function() {
 			.attr("class","axis");
 
 		var ylabel = svg_yaxis.append("text")
-			.attr("class", "label")
+			.attr("class", "ylabel")
 			.text(data.units)
 		ylabel
 			.attr("y", h/2 + ylabel.node().getComputedTextLength() / 2)
@@ -261,8 +320,6 @@ $(function() {
 		var columns = svg_content.selectAll("rect.column")
 			.data(dataset);
 		var bars = svg_content.selectAll("rect.bar")
-			.data(dataset);
-		var labels = svg_xaxis.selectAll("text")
 			.data(dataset);
 
 		bars.enter()
@@ -284,9 +341,9 @@ $(function() {
 			.attr("width", function(d) { return w / dataset.length - 4; })
 			.attr("height", function(d) { return h; })
 			.on("mouseover", function(d, i) {
-				var container = svg_xaxis.append("g");
+				var container = svg_hover.append("g");
 				var label = container.append("text")
-					.attr("class","label")
+					.attr("class","hoverlabel")
 					.attr("y",40)
 					.text(d.label)
 				var value = container.append("text")
@@ -298,7 +355,7 @@ $(function() {
 				value.attr("x", w/2 - value.node().getComputedTextLength() / 2)
 			} )
 			.on("mouseout", function(d, i) {
-				var container = svg_xaxis.node()
+				var container = svg_hover.node()
 				while (container.lastChild) {
 					container.removeChild(container.lastChild);
 				}
