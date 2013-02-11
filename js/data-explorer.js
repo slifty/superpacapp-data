@@ -174,7 +174,7 @@ $(function() {
 			.range([0, w]);
 		var yScale = d3.scale.linear()
 			.domain([0, d3.max(dataset, function(d) { return parseInt(d.value); })])
-			.range([h - padding, 10]);
+			.range([h - padding, 30]);
 		var yAxis = d3.svg.axis()
 			.scale(yScale)
 			.orient("left")
@@ -191,7 +191,7 @@ $(function() {
 		var svg_xaxis = d3.select("#data-explorer-xaxis")
 			.append("svg")
 			.attr("width", w)
-			.attr("height", 30)
+			.attr("height", 50)
 		var svg_hover = d3.select("#data-explorer-xaxis")
 			.append("svg")
 			.attr("width", w)
@@ -208,8 +208,14 @@ $(function() {
 			.data(dataset);
 		var labels = svg_xaxis.selectAll("text")
 			.data(dataset);
-		var xlabels = svg_xaxis.selectAll("text")
-			.data(attributes["tags"]);
+
+
+		if(true) {
+			var xicons = svg_xaxis.selectAll("image")
+				.data(attributes["tags"]);
+			var xlabels = svg_xaxis.selectAll("text")
+		 		.data(attributes["tags"]);
+		}
 
 		var ylabel = svg_yaxis.append("text")
 			.attr("class", "ylabel")
@@ -219,13 +225,30 @@ $(function() {
 			.attr("x", 35)
 			.attr("transform","rotate(270,35," + (h/2 + ylabel.node().getComputedTextLength() / 2) + ")")
 
-		xlabels.enter()
-			.append("text")
-			.attr("class","xlabel")
-			.text(function(d) { return d; })
+		svg_content.append("text")
+			.attr("class","instructions")
+			.attr("x", w - 200)
 			.attr("y", 20)
-			.attr("x", function(d,i) { return Math.floor(i / attributes["tags"].length * w + (w / (dataset.length + attributes["tags"].length) * period) / 2); })
-			.attr("text-anchor", "middle")
+			.text("interact for more information");
+
+		if(true) {
+			xicons.enter()
+				.append("image")
+				.attr("class","xlabel")
+				.attr("xlink:href", function(d) { console.log(d); return "img/" + d + ".png"; })
+				.attr("height", 30)
+				.attr("width", 30)
+				.attr("y", 0)
+				.attr("x", function(d,i) { return Math.floor(i / attributes["tags"].length * w + (w / (dataset.length + attributes["tags"].length) * period) / 2) - 15; })
+				.attr("text-anchor", "middle")
+			xlabels.enter()
+				.append("text")
+				.attr("class","xlabel")
+				.text(function(d) { return d; })
+				.attr("y", 45)
+				.attr("x", function(d,i) { return Math.floor(i / attributes["tags"].length * w + (w / (dataset.length + attributes["tags"].length) * period) / 2); })
+				.attr("text-anchor", "middle")
+		}
 
 		bars.enter()
 			.append("rect")
@@ -239,26 +262,33 @@ $(function() {
 			.attr("height", function(d) { return h - padding - yScale(d.value); })
 			.attr("y", function(d) { return yScale(d.value); })
 
+		var highlightRow = function(d, i) {
+			var container = svg_hover.append("g");
+			var label = container.append("text")
+				.attr("class","hoverlabel")
+				.attr("y",40)
+				.text(d.label)
+			var value = container.append("text")
+				.attr("class","value")
+				.attr("y",60)
+				.text(d.value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","))
+
+			label.attr("x", w/2 - label.node().getComputedTextLength() / 2)
+			value.attr("x", w/2 - value.node().getComputedTextLength() / 2)
+			bars.attr("class", "bar")
+			bars.filter(function(d, j) { return j == i; })
+				.attr("class", "bar active")
+
+		}
+
 		columns.enter()
 			.append("rect")
 			.attr("class","column")
 			.attr("x", function(d, i) { return xScale(i + Math.floor(i/period)); })
 			.attr("width", function(d) { return w / dataset.length - 4; })
 			.attr("height", function(d) { return h; })
-			.on("mouseover", function(d, i) {
-				var container = svg_hover.append("g");
-				var label = container.append("text")
-					.attr("class","hoverlabel")
-					.attr("y",40)
-					.text(d.label)
-				var value = container.append("text")
-					.attr("class","value")
-					.attr("y",60)
-					.text(d.value)
-
-				label.attr("x", w/2 - label.node().getComputedTextLength() / 2)
-				value.attr("x", w/2 - value.node().getComputedTextLength() / 2)
-			} )
+			.on("click",  highlightRow)
+			.on("mouseover",  highlightRow)
 			.on("mouseout", function(d, i) {
 				var container = svg_hover.node()
 				while (container.lastChild) {
@@ -282,10 +312,10 @@ $(function() {
 
 		var xScale = d3.scale.linear()
 			.domain([0, dataset.length])
-			.range([0, w]);
+			.range([0, w-10]);
 		var yScale = d3.scale.linear()
 			.domain([0, d3.max(dataset, function(d) { return parseInt(d.value); })])
-			.range([h - padding, 10]);
+			.range([h - padding, 30]);
 		var yAxis = d3.svg.axis()
 			.scale(yScale)
 			.orient("left")
@@ -308,13 +338,27 @@ $(function() {
 			.attr("width", w)
 			.attr("height", 70)
 
-		var xlabel = svg_xaxis.append("text")
-			.attr("class", "xlabel")
-			.text(data.xlabel)
-		xlabel
-			.attr("y", 20)
-			.attr("x", w/2 - xlabel.node().getComputedTextLength() / 2)
 
+		if(dataset.length > 25) {
+			var xlabel = svg_xaxis.append("text")
+				.attr("class", "xlabel")
+				.text(data.xlabel)
+			xlabel
+				.attr("y", 20)
+				.attr("x", w/2 - xlabel.node().getComputedTextLength() / 2)
+		} else {
+			svg_xaxis.attr("height", Math.max(50,d3.max(dataset, function(d) { return d.label.length; }) * 5))
+			var labels = svg_xaxis.selectAll("text")
+				.data(dataset);
+			labels.enter()
+				.append("text")
+				.attr("x", function(d, i) {
+	            	return xScale(i) + 5;
+				})
+				.attr("y", 10)
+				.text(function(d) { return d.label })
+	    		.attr("transform", function(d, i) { return "rotate(40," + (xScale(i) + 7) + ",10)"; })
+		}
 
 		svg_yaxis.append("g")
 			.call(yAxis)
@@ -328,6 +372,12 @@ $(function() {
 			.attr("y", h/2 + ylabel.node().getComputedTextLength() / 2)
 			.attr("x", 35)
 			.attr("transform","rotate(270,35," + (h/2 + ylabel.node().getComputedTextLength() / 2) + ")")
+
+		svg_content.append("text")
+			.attr("class","instructions")
+			.attr("x", w - 200)
+			.attr("y", 20)
+			.text("interact for more information");
 
 		var columns = svg_content.selectAll("rect.column")
 			.data(dataset);
@@ -346,26 +396,32 @@ $(function() {
 			.attr("height", function(d) { return h - padding - yScale(d.value); })
 			.attr("y", function(d) { return yScale(d.value); })
 
+		var highlightRow = function(d, i) {
+			var container = svg_hover.append("g");
+			var label = container.append("text")
+				.attr("class","hoverlabel")
+				.attr("y",40)
+				.text(d.label)
+			var value = container.append("text")
+				.attr("class","value")
+				.attr("y",60)
+				.text(d.value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","))
+
+			label.attr("x", w/2 - label.node().getComputedTextLength() / 2)
+			value.attr("x", w/2 - value.node().getComputedTextLength() / 2)
+
+			bars.attr("class", "bar")
+			bars.filter(function(d, j) { return j == i; })
+				.attr("class", "bar active")
+		};
 		columns.enter()
 			.append("rect")
 			.attr("class","column")
 			.attr("x", function(d, i) { return xScale(i); })
 			.attr("width", function(d) { return w / dataset.length - 4; })
 			.attr("height", function(d) { return h; })
-			.on("mouseover", function(d, i) {
-				var container = svg_hover.append("g");
-				var label = container.append("text")
-					.attr("class","hoverlabel")
-					.attr("y",40)
-					.text(d.label)
-				var value = container.append("text")
-					.attr("class","value")
-					.attr("y",60)
-					.text(d.value)
-
-				label.attr("x", w/2 - label.node().getComputedTextLength() / 2)
-				value.attr("x", w/2 - value.node().getComputedTextLength() / 2)
-			} )
+			.on("click",  highlightRow)
+			.on("mouseover",  highlightRow)
 			.on("mouseout", function(d, i) {
 				var container = svg_hover.node()
 				while (container.lastChild) {

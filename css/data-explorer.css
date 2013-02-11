@@ -39,7 +39,7 @@ svg rect.bar {
 	stroke: #47494b;
 } 
 svg rect.bar.active {
-	fill: #ff0000;
+	fill: #476A8A;
 } 
 svg rect.column {
 	fill: rgba(0,0,0,0);
@@ -57,12 +57,18 @@ svg .axis path, svg .axis text {
 }
 svg text.xlabel {
 	font-weight: bold;
+	text-transform:capitalize;
 }
 svg text.ylabel {
     font-size: 20pt;
 	font-weight: bold;
+	text-transform:capitalize;
 }
 svg text.hoverlabel {
 	font-weight: bold;
     font-size: 20pt;
+	text-transform:capitalize;
+}
+svg text.instructions {
+	font-style: italic;
 }
