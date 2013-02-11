@@ -59,6 +59,10 @@ svg text.xlabel {
 	font-weight: bold;
 	text-transform:capitalize;
 }
+svg text.tiny {
+	font-size: 8pt;
+	font-weight: bold;
+}
 svg text.ylabel {
     font-size: 20pt;
 	font-weight: bold;

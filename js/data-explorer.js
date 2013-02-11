@@ -338,8 +338,18 @@ $(function() {
 			.attr("width", w)
 			.attr("height", 70)
 
-
-		if(dataset.length > 25) {
+		if(data.xlabel == "dates") {
+			svg_xaxis.attr("height", Math.max(50,d3.max(dataset, function(d) { return d.label.length; }) * 5))
+			var labels = svg_xaxis.selectAll("text")
+				.data(dataset);
+			labels.enter()
+				.append("text")
+				.attr("class", "tiny")
+				.attr("x", function(d, i) { return xScale(i); })
+				.attr("y", 5)
+				.text(function(d,i) { return (i%5 == 0)?d.label:""; })
+	    		.attr("transform", function(d, i) { return "rotate(70," + (xScale(i)) + ",5)"; })
+		} else if(dataset.length > 25) {
 			var xlabel = svg_xaxis.append("text")
 				.attr("class", "xlabel")
 				.text(data.xlabel)
