@@ -33,6 +33,9 @@ body {
 #data-explorer-menu ul { margin: 0px; padding :0px; }
 #data-explorer-menu li { float: left; list-style: none; width: 120px; cursor: pointer; text-align: center; background: #313234; border: 1px solid #2C3135; color: #FFF; padding: 5px;  margin: 5px;}
 #data-explorer-menu li.active { background: #274A6A; }
+#data-explorer-title h3 { text-align: center; margin: 0px; margin-top: 20px; }
+#data-explorer-title div.note { text-align: center; font-size: .8em;}
+
 
 svg rect.bar {
 	fill: #274A6A;

@@ -13,11 +13,16 @@ $(function() {
 			method: "GET",
 			url: "data/ad_claims.json"
 		}).success(function(data) { datasets["ad_claims"] = data; }),
+		// $.ajax({
+		// 	dataType: "json",
+		// 	method: "GET",
+		// 	url: "data/voting_data.json"
+		// }).success(function(data) { datasets["voting_data"] = data; }),
 		$.ajax({
 			dataType: "json",
 			method: "GET",
-			url: "data/voting_data.json"
-		}).success(function(data) { datasets["voting_data"] = data; }),
+			url: "data/compiled_voting_data.json"
+		}).success(function(data) { datasets["compiled_voting_data"] = data; }),
 		$.ajax({
 			dataType: "json",
 			method: "GET",
@@ -70,8 +75,11 @@ $(function() {
 
 		var $option_city = $("#data-option-date")
 			.click(function() {
+				console.log("TEST1");
 				set_active_button($(this));
+				console.log("TEST2");
 				render_graph(datasets["sessions_date"]);
+				console.log("TEST3");
 			});
 
 		var $option_city = $("#data-option-state")
@@ -104,11 +112,12 @@ $(function() {
 	})
 
 	function set_active_button($button) {
-			$(".active").removeClass("active");
+			$("#data-explorer-menu .active").removeClass("active");
 			$button.addClass("active");
 	}
 	function render_timeline(type) {
-		data = datasets["voting_data"];
+		/* THIS LOADS THE UNCOMPILED DATA (and compiles it)
+		var data = datasets["voting_data"];
 		var core_dataset = data.items;
 		var attributes = {
 			tags: [],
@@ -144,7 +153,18 @@ $(function() {
 			calculated_dataset[core_dataset[x]["tag"]]["suppopps"][core_dataset[x]["suppopp"]]++;
 			calculated_dataset[core_dataset[x]["tag"]]["org_types"][core_dataset[x]["org_type"]]++;
 		}
-		
+		var data = {};
+		data.calculated_dataset = calculated_dataset;
+		data.attributes = attributes;
+		data.descriptions = {
+			"suppopps":"User ad ratings by rating type and candidate.",
+			"org_types":"User ad ratings by rating type and type of organization."
+		}; 
+		console.log(JSON.stringify(data));/**/
+		var data = datasets["compiled_voting_data"];
+		var calculated_dataset = data.calculated_dataset;
+		var dataset = [];
+		var attributes = data.attributes;
 		for(var x in calculated_dataset) {
 			var tag = calculated_dataset[x];
 			period = 0
@@ -163,6 +183,10 @@ $(function() {
 			.append('<div id="data-explorer-yaxis" />')
 			.append('<div class="scroll"><div id="data-explorer-content" /><div id="data-explorer-xaxis" /></div>')
 			.append('<div id="data-filters" />')
+
+		var $title = $("#data-explorer-title")
+			.html("<h3>" + (data.descriptions[type]?data.descriptions[type]:"") + "</h3>" + (data.note?"<div class='note'>" + data.note + "</div>":""))
+
 		var $content = $("#data-explorer-content");
 
 		var w = $content.width();
@@ -209,13 +233,10 @@ $(function() {
 		var labels = svg_xaxis.selectAll("text")
 			.data(dataset);
 
-
-		if(true) {
-			var xicons = svg_xaxis.selectAll("image")
-				.data(attributes["tags"]);
-			var xlabels = svg_xaxis.selectAll("text")
-		 		.data(attributes["tags"]);
-		}
+		var xicons = svg_xaxis.selectAll("image")
+			.data(attributes["tags"]);
+		var xlabels = svg_xaxis.selectAll("text")
+	 		.data(attributes["tags"]);
 
 		var ylabel = svg_yaxis.append("text")
 			.attr("class", "ylabel")
@@ -227,28 +248,26 @@ $(function() {
 
 		svg_content.append("text")
 			.attr("class","instructions")
-			.attr("x", w - 200)
+			.attr("x", w - 235)
 			.attr("y", 20)
-			.text("interact for more information");
+			.text("Click on bars for more information");
 
-		if(true) {
-			xicons.enter()
-				.append("image")
-				.attr("class","xlabel")
-				.attr("xlink:href", function(d) { console.log(d); return "img/" + d + ".png"; })
-				.attr("height", 30)
-				.attr("width", 30)
-				.attr("y", 0)
-				.attr("x", function(d,i) { return Math.floor(i / attributes["tags"].length * w + (w / (dataset.length + attributes["tags"].length) * period) / 2) - 15; })
-				.attr("text-anchor", "middle")
-			xlabels.enter()
-				.append("text")
-				.attr("class","xlabel")
-				.text(function(d) { return d; })
-				.attr("y", 45)
-				.attr("x", function(d,i) { return Math.floor(i / attributes["tags"].length * w + (w / (dataset.length + attributes["tags"].length) * period) / 2); })
-				.attr("text-anchor", "middle")
-		}
+		xicons.enter()
+			.append("image")
+			.attr("class","xlabel")
+			.attr("xlink:href", function(d) { return "img/" + d + ".png"; })
+			.attr("height", 30)
+			.attr("width", 30)
+			.attr("y", 0)
+			.attr("x", function(d,i) { return Math.floor(i / attributes["tags"].length * w + (w / (dataset.length + attributes["tags"].length) * period) / 2) - 15; })
+			.attr("text-anchor", "middle")
+		xlabels.enter()
+			.append("text")
+			.attr("class","xlabel")
+			.text(function(d) { return d; })
+			.attr("y", 45)
+			.attr("x", function(d,i) { return Math.floor(i / attributes["tags"].length * w + (w / (dataset.length + attributes["tags"].length) * period) / 2); })
+			.attr("text-anchor", "middle")
 
 		bars.enter()
 			.append("rect")
@@ -290,6 +309,7 @@ $(function() {
 			.on("click",  highlightRow)
 			.on("mouseover",  highlightRow)
 			.on("mouseout", function(d, i) {
+				bars.attr("class", "bar")
 				var container = svg_hover.node()
 				while (container.lastChild) {
 					container.removeChild(container.lastChild);
@@ -300,6 +320,10 @@ $(function() {
 
 	function render_graph(data) {
 		var dataset = data.items;
+
+		var $title = $("#data-explorer-title")
+			.html("<h3>" + data.description + "</h3>" + (data.note?"<div class='note'>" + data.note + "</div>":""))
+
 		var $graph = $("#data-explorer-graph")
 			.empty()
 			.append('<div id="data-explorer-yaxis" />')
@@ -385,9 +409,9 @@ $(function() {
 
 		svg_content.append("text")
 			.attr("class","instructions")
-			.attr("x", w - 200)
+			.attr("x", w - 235)
 			.attr("y", 20)
-			.text("interact for more information");
+			.text("Click on bars for more information");
 
 		var columns = svg_content.selectAll("rect.column")
 			.data(dataset);
@@ -433,6 +457,7 @@ $(function() {
 			.on("click",  highlightRow)
 			.on("mouseover",  highlightRow)
 			.on("mouseout", function(d, i) {
+				bars.attr("class", "bar")
 				var container = svg_hover.node()
 				while (container.lastChild) {
 					container.removeChild(container.lastChild);
